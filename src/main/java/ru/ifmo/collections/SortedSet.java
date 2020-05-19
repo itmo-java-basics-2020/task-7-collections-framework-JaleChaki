@@ -1,7 +1,6 @@
 package ru.ifmo.collections;
 
-import java.util.AbstractSet;
-import java.util.Comparator;
+import java.util.*;
 
 /**
  * Represents sorted set of unique values.
@@ -19,18 +18,69 @@ import java.util.Comparator;
 public abstract class SortedSet<T> extends AbstractSet<T> {
     // private final Map<???, ???> contents; TODO decide Map implementation and key/value types. "???" is used just as an example
     public static <T> SortedSet<T> create() {
-        throw new UnsupportedOperationException(); // TODO implement
+        return new ConcreteSortedSet<T>(null);
     }
 
     public static <T> SortedSet<T> from(Comparator<T> comparator) {
+        return new ConcreteSortedSet<T>(comparator);
+    }
+
+    public ArrayList<T> getSorted() {
         throw new UnsupportedOperationException(); // TODO implement
     }
 
-    public T[] getSorted() {
+    public ArrayList<T> getReversed() {
         throw new UnsupportedOperationException(); // TODO implement
     }
 
-    public T[] getReversed() {
-        throw new UnsupportedOperationException(); // TODO implement
+    private static class ConcreteSortedSet<T> extends SortedSet<T> {
+
+        TreeMap<T, Object> innerCollection;
+
+        private Object crutch;
+
+        public ConcreteSortedSet(Comparator<T> cmp) {
+            innerCollection = new TreeMap<>(cmp);
+            crutch = new Object();
+        }
+
+        @Override
+        public ArrayList<T> getReversed() {
+            return new ArrayList<T>(innerCollection.descendingKeySet());
+        }
+
+        @Override
+        public ArrayList<T> getSorted() {
+            return new ArrayList<T>(innerCollection.keySet());
+        }
+
+        @Override
+        public boolean add(T obj) {
+            return innerCollection.put(obj, crutch) == null;
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends T> c) {
+            boolean result = false;
+            for (T obj : c) {
+                result = this.add(obj) || result;
+            }
+            return result;
+        }
+
+        @Override
+        public boolean remove(Object obj) {
+            return innerCollection.remove(obj) != null;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return innerCollection.keySet().iterator();
+        }
+
+        @Override
+        public int size() {
+            return innerCollection.size();
+        }
     }
 }
